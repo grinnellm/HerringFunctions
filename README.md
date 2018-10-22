@@ -1,3 +1,5 @@
+# Helper functions for Pacific Herring scripts
+
 Start an **R** package for my functions in `Functions.R`.
 This script is used to support several of my scripts; the different versions have been replaced with one official version on **GitHub**.
 First, I need a good package name!
