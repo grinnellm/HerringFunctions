@@ -13,6 +13,10 @@
 # Overview: 
 # Some helper functions that are (or could be) used in more than 1 script.
 
+##### Packages #####
+# TODO: There are other!
+require( ggplot2 )
+
 ##### Main ##### 
 
 # Function to transform from Season to Year
