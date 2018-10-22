@@ -14,7 +14,7 @@
 # Some helper functions that are (or could be) used in more than 1 script.
 
 ##### Packages #####
-# TODO: There are other!
+# TODO: There are others!
 require( ggplot2 )
 
 ##### Main ##### 
