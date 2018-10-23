@@ -331,7 +331,6 @@ LoadAreaData <- function( where ) {
   # Manually determine groups: Area 27
   locations$Group[locations$Section %in% c(271:274)] <- "No Group"
   locations$Group[locations$Section %in% c(270)] <- "No Group"
-  
   # If any groups are NA, check if *some* are missing (i.e., incomplete)
   if( any(is.na(locations$Group)) ) {
     # Get distinct rows
@@ -405,7 +404,7 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     # If retain all the regions
     if( keepAll ) {
       # If the region is Johnstone Strait
-      if( region == "JS" ) {
+      if( all(region == "JS") ) {
         # Update the JS SAR
         dat@data <- dat@data %>%
             mutate( SAR=ifelse(Section %in% jsSections & SAR == -1, 8, SAR) )
@@ -414,7 +413,7 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
       res <- dat[dat$SAR != -1, ]
     } else {  # End if retain all, otherwise
       # If the region is Johnstone Strait
-      if( region == "JS" ) {
+      if( all(region == "JS") ) {
         # Subset to the right sections
         res <- dat[dat$Section %in% jsSections, ]
         # Update the SAR
