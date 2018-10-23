@@ -238,7 +238,11 @@ LoadAreaData <- function( where ) {
     # Message
     cat( "Note overlap between JS and SoG: Sections 132 and 135\n")
     # Access the sections worksheet and wrangle
-    sections <- sqlFetch( channel=accessDB, sqtable=where$fns$sections ) %>%
+    sections <- sqlFetch( channel=accessDB, sqtable=where$fns$sections )
+    # Error if data was not fetched
+    if( class(sections) != "data.frame" )
+      stop( "No data available in MS Access connection" )
+    sections <- sections %>%
         filter( Section %in% jsSections ) %>%
         mutate( SAR=8 ) %>%
         full_join( y=regions, by="SAR" ) %>%
@@ -248,7 +252,11 @@ LoadAreaData <- function( where ) {
         as_tibble( )
   } else {  # End if Johnstone Strait, otherwise
     # Access the sections worksheet and wrangle
-    sections <- sqlFetch( channel=accessDB, sqtable=where$fns$sections ) %>%
+    sections <- sqlFetch( channel=accessDB, sqtable=where$fns$sections )
+    # Error if data was not fetched
+    if( class(sections) != "data.frame" )
+      stop( "No data available in MS Access connection" )
+    sections <- sections %>%
         filter( SAR != -1 ) %>%
         full_join( y=regions, by="SAR" ) %>%
         filter( Region %in% region ) %>%
@@ -258,6 +266,9 @@ LoadAreaData <- function( where ) {
   }  # End if the region is not Johnstone Strait
   # Access the locations worksheet  
   locDat <- sqlFetch( channel=accessDB, sqtable=where$fns$locations )
+  # Error if data was not fetched
+  if( class(locDat) != "data.frame" )
+    stop( "No data available in MS Access connection" )
   # Grab the spatial info (X and Y)
   locSP <- locDat %>%
       transmute( X=ifelse(is.na(Location_Longitude), 0, Location_Longitude),
