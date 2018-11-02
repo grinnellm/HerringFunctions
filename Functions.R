@@ -420,7 +420,9 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
         res$SAR <- 8
       } else {  # End if Johnstone Strait, otherwise
         # Subset to the right area
-        res <- dat[dat$SAR %in% aSm$SAR, ]  
+        res <- dat[dat$SAR %in% aSm$SAR, ]
+        # If requested, get the subset of sections specified
+        if( !all(is.na(sectionSub)) )  res <- res[res$Section%in%sectionSub, ]
       }  # End if the region is not Johnstone Strait      
     }  # End if not retaining all
     # Return updated sections
