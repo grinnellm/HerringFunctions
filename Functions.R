@@ -305,9 +305,11 @@ LoadAreaData <- function( where ) {
   locations$Group[locations$Section %in% c(70, 79)] <- "06&07"
   locations$Group[locations$Section %in% c(85, 86)] <- "08"
   # Manually determine groups: Strait of Georgia
+  # locations$Group <- "Others"
+  # locations$Group[locations$Section %in% c(135, 141, 151, 152, 161, 162, 163)] <- "PowellRiver"
   locations$Group[locations$Section %in% c(132, 135, 141)] <- "Lazo"
   locations$Group[locations$Section %in% c(142, 143, 171, 172)] <- "14&17"
-  locations$Group[locations$Section %in% c(151, 152, 161:165, 280, 291, 292)] <- 
+  locations$Group[locations$Section %in% c(151, 152, 161:165, 280, 291, 292)] <-
       "ESoG"
   locations$Group[locations$Section %in% c(150, 160)] <- "ESoG"
   locations$Group[locations$Section %in% c(173, 181, 182, 191:193)] <- "SDodd"
