@@ -118,6 +118,19 @@ RollMeanNA <- function( dat, n ) {
   return( dat )
 }  # End RollMeanNA function
 
+# Calculate unique if there are non-NA values, return NA if all values are NA
+UniqueNA <- function( x ) {
+  # An alternate version to unique, which fails sometimes if there are no 
+  # values. This version retuns NA if x is all NA, otherwise it returns the
+  # unique values.
+  # If all NA, NA; otherwise, unique
+  ifelse( all(is.na(x)), 
+    res <- NA, 
+    res <- unique(x) )
+  # Return the result 
+  return( res )
+}  # End UniqueNA function
+
 # Calculate plot margin by expanding the range of x and y as a percentage
 CalcXYLims <- function( x, y, pX=0.01, pY=0.01 ) {
   # Set the space between the points and the plot border manually as a specified
