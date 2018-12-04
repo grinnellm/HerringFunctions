@@ -752,7 +752,23 @@ Num2Word <- function( x ) {
   # Return the result
   return( res )
 }  # End function Num2Word
-  
+
+# Install missing packages and load required packages (if required)
+UsePackages <- function( pkgs, locn="https://cran.rstudio.com/" ) {
+  # Reverse the list 
+  rPkgs <- rev( pkgs )
+  # Identify missing (i.e., not yet installed) packages
+  newPkgs <- rPkgs[!(rPkgs %in% installed.packages( )[, "Package"])]
+  # Install missing packages if required
+  if( length(newPkgs) )  install.packages( newPkgs, repos=locn )
+  # Loop over all packages
+  for( i in 1:length(rPkgs) ) {
+    # Load required packages using 'library'
+    eval( parse(text=paste("suppressPackageStartupMessages(library(", rPkgs[i], 
+      "))", sep="")) )
+  }  # End i loop over package names
+}  # End UsePackages function
+
 ##### End ##### 
 
 # Print end of file message
