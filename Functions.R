@@ -307,10 +307,13 @@ LoadAreaData <- function( where ) {
   # Intialize an additional column for groups: NA
   locations$Group <- NA
   # Manually determine groups: Haida Gwaii
-  locations$Group[locations$Section %in% c(21, 25)] <- "Juan Perez/Skincuttle"
   locations$Group[locations$Section %in% c(6)] <- "Louscoone"
+  locations$Group[locations$Section %in% c(11)] <- "Massett"
+  locations$Group[locations$Section %in% c(12)] <- "Naden"
+  locations$Group[locations$Section %in% c(21, 25)] <- "Juan Perez/Skincuttle"
+  locations$Group[locations$Section %in% c(22)] <- "E Skidegate"
   locations$Group[locations$Section %in% c(23)] <- "Cumshewa"
-  locations$Group[locations$Section %in% c(24)] <- "Selwyn"  # Or Laskeek
+  locations$Group[locations$Section %in% c(24)] <- "Selwyn"
   # Manually determine groups: Prince Rupert District
   locations$Group[locations$Section %in% c(31:33, 41:43, 51:53)] <- "No group"
   locations$Group[locations$Section %in% c(40, 49, 50, 59)] <- "No group"
@@ -343,8 +346,11 @@ LoadAreaData <- function( where ) {
   locations$Group[locations$Section %in% c(253)] <- "Nuchatlitz/Ehattesaht"
   #  locations$Group[locations$Section %in% c(250, 259)] <- "SA 25 Unkn"
   # Manually determine groups: Area 2 West
-  locations$Group[locations$Section %in% c(1:5)] <- "No group"
   locations$Group[locations$Section %in% c(0)] <- "No group"
+  locations$Group[locations$Section %in% c(1)] <- "South West"
+  locations$Group[locations$Section %in% c(2, 3)] <- "Athlow/Rennell"
+  locations$Group[locations$Section %in% c(4)] <- "Cartwright/W Skidegate"
+  locations$Group[locations$Section %in% c(5)] <- "Engelfield"
   # Manually determine groups: Area 27
   locations$Group[locations$Section %in% c(271:274)] <- "No Group"
   locations$Group[locations$Section %in% c(270)] <- "No Group"
