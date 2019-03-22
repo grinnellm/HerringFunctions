@@ -347,10 +347,9 @@ LoadAreaData <- function( where ) {
   #  locations$Group[locations$Section %in% c(250, 259)] <- "SA 25 Unkn"
   # Manually determine groups: Area 2 West
   locations$Group[locations$Section %in% c(0)] <- "No group"
-  locations$Group[locations$Section %in% c(1)] <- "South West"
-  locations$Group[locations$Section %in% c(2, 3)] <- "Athlow/Rennell"
-  locations$Group[locations$Section %in% c(4)] <- "Cartwright/W Skidegate"
-  locations$Group[locations$Section %in% c(5)] <- "Engelfield"
+  locations$Group[locations$Section %in% c(2)] <- "Pt Louis/Chanal"
+  locations$Group[locations$Section %in% c(3, 4)] <- "Engelfield/Rennell"
+  locations$Group[locations$Section %in% c(1, 5)] <- "Southwest"
   # Manually determine groups: Area 27
   locations$Group[locations$Section %in% c(271:274)] <- "No Group"
   locations$Group[locations$Section %in% c(270)] <- "No Group"
