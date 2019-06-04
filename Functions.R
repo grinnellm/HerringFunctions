@@ -780,25 +780,15 @@ DeltaPercent <- function( x, nYrs=1, type ) {
   # Numerator: difference
   top <- x - lag( x, n=nYrs )
   # Denominator
-  if( type=="PctChange" ) bottom <- lag( x, n=nYrs )            # First value
-  if( type=="PctDiff" )   bottom <- ( x + lag(x, n=nYrs) ) / 2  # Mean of values
+  if( type=="PctChange" ) bot <- lag( x, n=nYrs )            # Previous value
+  if( type=="PctDiff" )   bot <- ( x + lag(x, n=nYrs) ) / 2  # Mean of values
+  # Erro if there's no denominator
+  if( !exists("bot") )  stop( "No denominator; check 'type'" )
   # Calculate percent change
-  res <- top / bottom * 100
+  res <- top / bot * 100
   # Return the result
   return( res )
 }  # End DeltaPercent function
-
-# Calculate percent difference
-PercentDifference <- function( x, nYrs=1 ) {
-  # Numerator: difference
-  top <- x - lag( x, n=nYrs )
-  # Denominator
-  
-  # Calculate percent difference
-  res <- top / bottom * 100
-  # Return the result
-  return( res )
-}  # End PercentDifference function
 
 ##### End ##### 
 
