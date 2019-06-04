@@ -775,24 +775,25 @@ UsePackages <- function( pkgs, locn="https://cran.rstudio.com/" ) {
   }  # End i loop over package names
 }  # End UsePackages function
 
-# Calculate percent change
-PercentChange <- function( x, nYrs=1 ) {
+# Calculate percent change, difference, etc
+DeltaPercent <- function( x, nYrs=1, type ) {
   # Numerator: difference
   top <- x - lag( x, n=nYrs )
-  # Denominator: first value
-  bottom <- lag( x, n=nYrs )
+  # Denominator
+  if( type=="PctChange" ) bottom <- lag( x, n=nYrs )            # First value
+  if( type=="PctDiff" )   bottom <- ( x + lag(x, n=nYrs) ) / 2  # Mean of values
   # Calculate percent change
   res <- top / bottom * 100
   # Return the result
   return( res )
-}  # End PercentChange function
+}  # End DeltaPercent function
 
 # Calculate percent difference
 PercentDifference <- function( x, nYrs=1 ) {
   # Numerator: difference
   top <- x - lag( x, n=nYrs )
-  # Denominator: mean of values
-  bottom <- ( x + lag(x, n=nYrs) ) / 2
+  # Denominator
+  
   # Calculate percent difference
   res <- top / bottom * 100
   # Return the result
