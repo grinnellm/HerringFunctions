@@ -232,15 +232,17 @@ LoadAreaData <- function( where ) {
           8, JS, Johnstone Strait, FALSE",
     col_types=cols("i", "c", "c", "l") )
   # If region isn't JS, remove it
-  if( region != "JS" )  regions <- filter( .data=regions, SAR != 8 )
+  if( !region %in% c("JS", "All") )
+    regions <- filter( .data=regions, SAR != 8 )
   # Return the regions table to the main environment
   regions <<- regions
   # Possible regions by type (return to the main level)
   allRegions <<- list( major=as.character(regions$Region[regions$Major]), 
     minor=as.character(regions$Region[!regions$Major]) )
   # Error if region is incorrect
-  if( !all(region %in% unlist(allRegions)) )  stop( "Possible regions are: ", 
-    paste(unlist(allRegions), collapse=", "), call.=FALSE )
+  if( !(region %in% c(unlist(allRegions), "All")) )
+    stop( "Possible regions are: ", paste(unlist(allRegions), collapse=", "),
+      call.=FALSE )
   # Establish connection with access
   accessDB <- odbcConnectAccess( access.file=file.path(where$loc, where$db) )
   # TODO: Sections 132 and 135 are also SoG sections -- how to resolve?
@@ -270,12 +272,16 @@ LoadAreaData <- function( where ) {
     if( class(sections) != "data.frame" )
       stop( "No data available in MS Access connection" )
     sections <- sections %>%
-      filter( SAR != -1 ) %>%
       full_join( y=regions, by="SAR" ) %>%
-      filter( Region %in% region ) %>%
       select( SAR, Region, RegionName, Section ) %>%
       distinct( ) %>%
-      as_tibble( )  
+      as_tibble( )
+    # If we only want a specific region
+    if( region != "All" ) {
+      # Remove areas outside SARs, and other regions
+      sections <- sections %>% 
+        filter( SAR != -1, Region == region )
+    }  # End if we only want a specific region
   }  # End if the region is not Johnstone Strait
   # Access the locations worksheet  
   locDat <- sqlFetch( channel=accessDB, sqtable=where$fns$locations )
@@ -353,6 +359,8 @@ LoadAreaData <- function( where ) {
   # Manually determine groups: Area 27
   locations$Group[locations$Section %in% c(271:274)] <- "No Group"
   locations$Group[locations$Section %in% c(270)] <- "No Group"
+  # Set groups to NA if using all the data
+  if( region == "All" )  locations$Group <- NA
   # If any groups are NA, check if *some* are missing (i.e., incomplete)
   if( any(is.na(locations$Group)) ) {
     # Get distinct rows
@@ -432,7 +440,7 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
           mutate( SAR=ifelse(Section %in% jsSections & SAR == -1, 8, SAR) )
       }  # End if Johnstone Strait
       # Remove the non-SAR areas
-      res <- dat[dat$SAR != -1, ]
+      if( region != "All" )  res <- dat[dat$SAR != -1, ]
     } else {  # End if retain all, otherwise
       # If the region is Johnstone Strait
       if( all(region == "JS") ) {
@@ -534,8 +542,14 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     fortify( region="id" ) %>%
     rename( Eastings=long, Northings=lat ) %>%
     as_tibble( )
-  # Update sections (keep all areas)
-  secAllSPDF <- UpdateSections( dat=secRaw, keepAll=TRUE )
+  # If region is All
+  if( region == "All" ) {
+    # No need to re-run
+    secAllSPDF <- secSPDF
+  } else {  # End if All, otherwise
+    # Update sections (keep all areas)
+    secAllSPDF <- UpdateSections( dat=secRaw, keepAll=TRUE )
+  }  # End if not All
   # Dissolve to stat area
   saAllSPDF <- aggregate( x=secAllSPDF, by=list(Temp=secAllSPDF$StatArea),
     FUN=unique )
