@@ -840,9 +840,8 @@ CheckSpatialOverlay <- function( pts, shape ) {
   # If there are NAs in spatial info
   if( any(is.na(pts$Eastings), is.na(pts$Northings)) ) {
     # Message re NAs
-    warning( "CheckAreas found NAs in spatial info: Eastings (", 
-      sum(is.na(pts$Eastings)), "), and Northings (", 
-      sum(is.na(pts$Northings)), ")", sep="" )
+    warning( "NAs in spatial info: Eastings (", sum(is.na(pts$Eastings)),
+      "), and Northings (", sum(is.na(pts$Northings)), ")", sep="" )
     # Remove the NAs
     pts <- pts %>%
       filter( !is.na(Eastings), !is.na(Northings) )
@@ -868,8 +867,7 @@ CheckSpatialOverlay <- function( pts, shape ) {
     filter( StatAreaLoc!=StatAreaPoly | SectionLoc!=SectionPoly )
   # Warning if there are oddballs
   if( nrow(res) >= 1 )
-    warning( "CheckAreas found spatial inconsistencies for ", nrow(res),
-    " points" )
+    warning( "Spatial overlay inconsistencies for ", nrow(res), " points" )
   # Return the result
   return( res )
 }  # End CheckAreas function
