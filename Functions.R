@@ -835,8 +835,8 @@ DeltaPercent <- function( x, nYrs=1, type ) {
   return( res )
 }  # End DeltaPercent function
 
-# Make sure area info is consistent
-CheckAreas <- function( pts, shape ) {
+# Make sure area info is consistent using a spatial overlay
+CheckSpatialOverlay <- function( pts, shape ) {
   # If there are NAs in spatial info
   if( any(is.na(pts$Eastings), is.na(pts$Northings)) ) {
     # Message re NAs
@@ -847,10 +847,10 @@ CheckAreas <- function( pts, shape ) {
     pts <- pts %>%
       filter( !is.na(Eastings), !is.na(Northings) )
   }  # End if there are NAs
-  # Subset the points
+  # Subset the points and get stat area and section from the Locations table
   pts <- pts %>%
-    rename( StatAreaPt=StatArea, SectionPt=Section ) %>%
-    select( StatAreaPt, SectionPt, LocationCode, LocationName,
+    rename( StatAreaLoc=StatArea, SectionLoc=Section ) %>%
+    select( StatAreaLoc, SectionLoc, LocationCode, LocationName,
       Eastings, Northings, Longitude, Latitude ) %>%
     distinct( )
   # Convert to spatial object
@@ -865,7 +865,7 @@ CheckAreas <- function( pts, shape ) {
     select( StatAreaPoly, SectionPoly )
   # Bind the spatial info
   res <- bind_cols( pts, overPts ) %>%
-    filter( StatAreaPoly!=StatAreaPt | SectionPoly!=SectionPt )
+    filter( StatAreaLoc!=StatAreaPoly | SectionLoc!=SectionPoly )
   # Warning if there are oddballs
   if( nrow(res) >= 1 )
     warning( "CheckAreas found spatial inconsistencies for ", nrow(res),
