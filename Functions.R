@@ -283,15 +283,47 @@ LoadAreaData <- function( where ) {
         filter( SAR != -1, Region == region )
     }  # End if we only want a specific region
   }  # End if the region is not Johnstone Strait
-  # Access the locations worksheet  
-  locDat <- sqlFetch( channel=accessDB, sqtable=where$fns$locations )
+  # Access the first locations worksheet
+  locFirst <- sqlFetch( channel=accessDB, sqtable=where$fns$locationsFirst )
   # Error if data was not fetched
-  if( class(locDat) != "data.frame" )
+  if( class(locFirst) != "data.frame" )
     stop( "No data available in MS Access connection" )
+  # Access the second locations worksheet (use this to fill in missing info)
+  locSecond <- sqlFetch( channel=accessDB, sqtable=where$fns$locationsSecond )
+  # Error if data was not fetched
+  if( class(locSecond) != "data.frame" )
+    stop( "No data available in MS Access connection" )
+  # Wrangle the first locations table
+  locFirst <- as_tibble( locFirst ) %>%
+    select( Loc_Code, Loc_Name, StatArea, Section, Latitude, Longitude ) %>%
+    mutate( Loc_Name=as.character(Loc_Name) ) %>%
+    rename( LocationCode=Loc_Code, LocationName1=Loc_Name, StatArea1=StatArea,
+      Section1=Section, Latitude1=Latitude, Longitude1=Longitude ) %>%
+    distinct( )
+  # Wrangle the second locations table
+  locSecond <- as_tibble( locSecond ) %>%
+    select( Loc_Code, Location, StatArea, Section, Bed, Location_Latitude,
+      Location_Longitude ) %>%
+    mutate( Location=as.character(Location) ) %>%
+    rename( LocationCode=Loc_Code, LocationName2=Location, StatArea2=StatArea,
+      Section2=Section, Latitude2=Location_Latitude, 
+      Longitude2=Location_Longitude ) %>%
+    distinct(  )
+  # Combine the two tables and fill in missing data using the second table
+  locDat <- full_join( x=locFirst, y=locSecond, by="LocationCode" ) %>%
+    mutate(
+      LocationName=ifelse(is.na(LocationName1), LocationName2, LocationName1),
+      StatArea=ifelse(is.na(StatArea1), StatArea2, StatArea1),
+      Section=ifelse(is.na(Section1), Section2, Section1),
+      Longitude=ifelse(is.na(Longitude1), Longitude2, Longitude1),
+      Latitude=ifelse(is.na(Latitude1), Latitude2, Latitude1) ) %>%
+    select( LocationCode, LocationName, Bed, Section, StatArea, Longitude,
+      Latitude ) %>%
+    arrange( LocationCode )
   # Grab the spatial info (X and Y)
   locSP <- locDat %>%
-    transmute( X=ifelse(is.na(Location_Longitude), 0, Location_Longitude),
-      Y=ifelse(is.na(Location_Latitude), 0, Location_Latitude))
+    transmute( X=ifelse(is.na(Longitude), 0, Longitude),
+      Y=ifelse(is.na(Latitude), 0, Latitude))
   # Put X and Y into a spatial points object
   locPts <- SpatialPoints( coords=locSP, proj4string=CRS(inCRS) )
   # Convert X and Y from WGS to Albers
@@ -301,12 +333,10 @@ LoadAreaData <- function( where ) {
   # Extract relevant location data
   locations <- locDat %>%
     cbind( dfAlb ) %>%
-    rename( LocationCode=Loc_Code, LocationName=Location ) %>%
-    mutate( Eastings=ifelse(is.na(Location_Longitude), Location_Longitude, X),
-      Northings=ifelse(is.na(Location_Latitude), Location_Latitude, Y) ) %>%
+    mutate( Eastings=ifelse(is.na(Longitude), Longitude, X),
+      Northings=ifelse(is.na(Latitude), Latitude, Y) ) %>%
     select( StatArea, Section, LocationCode, LocationName, Bed, Eastings, 
-      Northings, Location_Latitude, Location_Longitude ) %>%
-    rename( Latitude=Location_Latitude, Longitude=Location_Longitude ) %>%
+      Northings, Latitude, Longitude ) %>%
     filter( Section %in% sections$Section ) %>%
     distinct( ) %>%
     as_tibble( )
@@ -603,6 +633,7 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     regSPDF=regSPDF, regDF=regDF, regCentDF=regCentDF,  
     xyRatio=xyRatio, extDF=extDF,
     landCropSPDF=landCropSPDF, landCropDF=landCropDF, 
+    secAllSPDF=secAllSPDF,
     secAllDF=secAllDF, saAllDF=saAllDF, regAllDF=regAllDF, 
     extAllDF=extAllDF, xyAllRation=xyAllRatio, 
     landAllCropDF=landAllCropDF) )
@@ -803,6 +834,45 @@ DeltaPercent <- function( x, nYrs=1, type ) {
   # Return the result
   return( res )
 }  # End DeltaPercent function
+
+# Make sure area info is consistent
+CheckAreas <- function( pts, shape ) {
+  # If there are NAs in spatial info
+  if( any(is.na(pts$Eastings), is.na(pts$Northings)) ) {
+    # Message re NAs
+    warning( "CheckAreas found NAs in spatial info: Eastings (", 
+      sum(is.na(pts$Eastings)), "), and Northings (", 
+      sum(is.na(pts$Northings)), ")", sep="" )
+    # Remove the NAs
+    pts <- pts %>%
+      filter( !is.na(Eastings), !is.na(Northings) )
+  }  # End if there are NAs
+  # Subset the points
+  pts <- pts %>%
+    rename( StatAreaPt=StatArea, SectionPt=Section ) %>%
+    select( StatAreaPt, SectionPt, LocationCode, LocationName,
+      Eastings, Northings, Longitude, Latitude ) %>%
+    distinct( )
+  # Convert to spatial object
+  ptsSPDF <- SpatialPointsDataFrame( 
+    coords=select(pts, Eastings, Northings), proj4string=CRS(outCRS),
+    data=pts )
+  # Spatial overlay
+  overPts <- over( x=ptsSPDF, y=shape ) %>%
+    as_tibble( ) %>%
+    mutate( StatArea=as.integer(StatArea), Section=as.integer(Section) ) %>%
+    rename( StatAreaPoly=StatArea, SectionPoly=Section ) %>%
+    select( StatAreaPoly, SectionPoly )
+  # Bind the spatial info
+  res <- bind_cols( pts, overPts ) %>%
+    filter( StatAreaPoly!=StatAreaPt | SectionPoly!=SectionPt )
+  # Warning if there are oddballs
+  if( nrow(res) >= 1 )
+    warning( "CheckAreas found spatial inconsistencies for ", nrow(res),
+    " points" )
+  # Return the result
+  return( res )
+}  # End CheckAreas function
 
 ##### End ##### 
 
