@@ -836,7 +836,7 @@ DeltaPercent <- function( x, nYrs=1, type ) {
 }  # End DeltaPercent function
 
 # Make sure area info is consistent using a spatial overlay
-CheckSpatialOverlay <- function( pts, shape ) {
+CheckSpatialOverlay <- function( pts, shape, type ) {
   # If there are NAs in spatial info
   if( any(is.na(pts$Eastings), is.na(pts$Northings)) ) {
     # Message re NAs
@@ -849,7 +849,8 @@ CheckSpatialOverlay <- function( pts, shape ) {
   # Subset the points and get stat area and section from the Locations table
   pts <- pts %>%
     rename( StatAreaLoc=StatArea, SectionLoc=Section ) %>%
-    select( StatAreaLoc, SectionLoc, LocationCode, LocationName,
+    mutate( Source=type ) %>%
+    select( Source, StatAreaLoc, SectionLoc, LocationCode, LocationName,
       Eastings, Northings, Longitude, Latitude ) %>%
     distinct( )
   # Convert to spatial object
