@@ -301,21 +301,23 @@ LoadAreaData <- function( where ) {
   # Error if data was not fetched
   if( class(locSecond) != "data.frame" )
     stop( "No data available in MS Access connection" )
-  # Wrangle the first locations table
+  # TODO: Need to sort out these two tables (i.e., preferably merge them to
+  # make one 'good' table, or revert the 1s and 2s as described below)
+  # Wrangle the first locations table (TODO: the 2s should actually be 1s)
   locFirst <- as_tibble( locFirst ) %>%
     select( Loc_Code, Loc_Name, StatArea, Section, Latitude, Longitude ) %>%
     mutate( Loc_Name=as.character(Loc_Name) ) %>%
-    rename( LocationCode=Loc_Code, LocationName1=Loc_Name, StatArea1=StatArea,
-      Section1=Section, Latitude1=Latitude, Longitude1=Longitude ) %>%
+    rename( LocationCode=Loc_Code, LocationName2=Loc_Name, StatArea2=StatArea,
+      Section2=Section, Latitude2=Latitude, Longitude2=Longitude ) %>%
     distinct( )
-  # Wrangle the second locations table
+  # Wrangle the second locations table (TODO: the 1s should actually be 2s)
   locSecond <- as_tibble( locSecond ) %>%
     select( Loc_Code, Location, StatArea, Section, Bed, Location_Latitude,
       Location_Longitude ) %>%
     mutate( Location=as.character(Location) ) %>%
-    rename( LocationCode=Loc_Code, LocationName2=Location, StatArea2=StatArea,
-      Section2=Section, Latitude2=Location_Latitude, 
-      Longitude2=Location_Longitude ) %>%
+    rename( LocationCode=Loc_Code, LocationName1=Location, StatArea1=StatArea,
+      Section1=Section, Latitude1=Location_Latitude, 
+      Longitude1=Location_Longitude ) %>%
     distinct(  )
   # Combine the two tables and fill in missing data using the second table
   locDat <- full_join( x=locFirst, y=locSecond, by="LocationCode" ) %>%
