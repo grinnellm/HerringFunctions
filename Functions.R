@@ -236,6 +236,14 @@ LoadAreaData <- function( where ) {
     regions <- filter( .data=regions, SAR != 8 )
   # Return the regions table to the main environment
   regions <<- regions
+  # Return region names
+  regionNames <- regions %>%
+    select( RegionName, Region, Major ) %>%
+    mutate( Region=paste("(", Region, ")", sep="") ) %>%
+    unite( RegionName, Region, col="Region", sep=" " )
+  # Make a nice list
+  allRegionNames <<- list( major=regionNames$Region[regionNames$Major],
+    minor=regionNames$Region[!regionNames$Major] )
   # Possible regions by type (return to the main level)
   allRegions <<- list( major=as.character(regions$Region[regions$Major]), 
     minor=as.character(regions$Region[!regions$Major]) )
