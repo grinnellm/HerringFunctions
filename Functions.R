@@ -354,15 +354,15 @@ LoadAreaData <- function( where ) {
   locations$Group <- NA
   # Manually determine groups: Haida Gwaii
   # locations$Group[locations$Section %in% c(6)] <- "Louscoone"
-  locations$Group[locations$Section %in% c(6)] <- "06"
+  locations$Group[locations$Section %in% c(6)] <- "006"
   locations$Group[locations$Section %in% c(11)] <- "Massett"
   locations$Group[locations$Section %in% c(12)] <- "Naden"
   # locations$Group[locations$Section %in% c(21, 25)] <- "Juan Perez/Skincuttle"
-  locations$Group[locations$Section %in% c(21, 25)] <- "21&25"
+  locations$Group[locations$Section %in% c(21, 25)] <- "021&025"
   locations$Group[locations$Section %in% c(22)] <- "E Skidegate"
   # locations$Group[locations$Section %in% c(23)] <- "Cumshewa"
   # locations$Group[locations$Section %in% c(24)] <- "Selwyn"
-  locations$Group[locations$Section %in% c(23, 24)] <- "23&24"
+  locations$Group[locations$Section %in% c(23, 24)] <- "023&024"
   # Manually determine groups: Prince Rupert District
   locations$Group[locations$Section %in% c(31:33, 41:43, 51:53)] <- "No group"
   locations$Group[locations$Section %in% c(40, 49, 50, 59)] <- "No group"
@@ -494,8 +494,10 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
       } else {  # End if Johnstone Strait, otherwise
         # Subset to the right area
         res <- dat[dat$SAR %in% aSm$SAR, ]
+        # Pub sections to subset in proper format
+        secSubChar <- formatC( sectionSub, width=3, format="d", flag="0" )
         # If requested, get the subset of sections specified
-        if( !all(is.na(sectionSub)) )  res <- res[res$Section%in%sectionSub, ]
+        if( !all(is.na(sectionSub)) )  res <- res[res$Section%in%secSubChar, ]
       }  # End if the region is not Johnstone Strait      
     }  # End if not retaining all
     # Return updated sections
