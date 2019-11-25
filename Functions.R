@@ -353,14 +353,16 @@ LoadAreaData <- function( where ) {
   # Intialize an additional column for groups: NA
   locations$Group <- NA
   # Manually determine groups: Haida Gwaii
-  locations$Group[locations$Section %in% c(6)] <- "Louscoone"
+  # locations$Group[locations$Section %in% c(6)] <- "Louscoone"
+  locations$Group[locations$Section %in% c(6)] <- "06"
   locations$Group[locations$Section %in% c(11)] <- "Massett"
   locations$Group[locations$Section %in% c(12)] <- "Naden"
-  locations$Group[locations$Section %in% c(21, 25)] <- "Juan Perez/Skincuttle"
+  # locations$Group[locations$Section %in% c(21, 25)] <- "Juan Perez/Skincuttle"
+  locations$Group[locations$Section %in% c(21, 25)] <- "21&25"
   locations$Group[locations$Section %in% c(22)] <- "E Skidegate"
   # locations$Group[locations$Section %in% c(23)] <- "Cumshewa"
   # locations$Group[locations$Section %in% c(24)] <- "Selwyn"
-  locations$Group[locations$Section %in% c(23, 24)] <- "Cumshewa/Selwyn"
+  locations$Group[locations$Section %in% c(23, 24)] <- "23&24"
   # Manually determine groups: Prince Rupert District
   locations$Group[locations$Section %in% c(31:33, 41:43, 51:53)] <- "No group"
   locations$Group[locations$Section %in% c(40, 49, 50, 59)] <- "No group"
