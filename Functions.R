@@ -291,49 +291,27 @@ LoadAreaData <- function( where ) {
         filter( SAR != -1, Region == region )
     }  # End if we only want a specific region
   }  # End if the region is not Johnstone Strait
-  # Access the first locations worksheet
-  locFirst <- sqlFetch( channel=accessDB, sqtable=where$fns$locationsFirst )
+  # Access the locations worksheet
+  loc <- sqlFetch( channel=accessDB, sqtable=where$fns$locations )
   # Error if data was not fetched
-  if( class(locFirst) != "data.frame" )
+  if( class(loc) != "data.frame" )
     stop( "No data available in MS Access connection" )
-  # Access the second locations worksheet (use this to fill in missing info)
-  locSecond <- sqlFetch( channel=accessDB, sqtable=where$fns$locationsSecond )
-  # Error if data was not fetched
-  if( class(locSecond) != "data.frame" )
-    stop( "No data available in MS Access connection" )
-  # TODO: Need to sort out these two tables (i.e., preferably merge them to
-  # make one 'good' table, or revert the 1s and 2s as described below)
-  # Wrangle the first locations table (TODO: the 2s should actually be 1s)
-  locFirst <- as_tibble( locFirst ) %>%
-    select( Loc_Code, Loc_Name, StatArea, Section, Latitude, Longitude ) %>%
-    mutate( Loc_Name=as.character(Loc_Name) ) %>%
-    rename( LocationCode=Loc_Code, LocationName2=Loc_Name, StatArea2=StatArea,
-      Section2=Section, Latitude2=Latitude, Longitude2=Longitude ) %>%
-    distinct( )
-  # Wrangle the second locations table (TODO: the 1s should actually be 2s)
-  locSecond <- as_tibble( locSecond ) %>%
+  # Wrangle the locations table
+  locDat <- as_tibble( loc ) %>%
     select( Loc_Code, Location, StatArea, Section, Bed, Location_Latitude,
       Location_Longitude ) %>%
     mutate( Location=as.character(Location) ) %>%
-    rename( LocationCode=Loc_Code, LocationName1=Location, StatArea1=StatArea,
-      Section1=Section, Latitude1=Location_Latitude, 
-      Longitude1=Location_Longitude ) %>%
-    distinct(  )
-  # Combine the two tables and fill in missing data using the second table
-  locDat <- full_join( x=locFirst, y=locSecond, by="LocationCode" ) %>%
-    mutate(
-      LocationName=ifelse(is.na(LocationName1), LocationName2, LocationName1),
-      StatArea=ifelse(is.na(StatArea1), StatArea2, StatArea1),
-      Section=ifelse(is.na(Section1), Section2, Section1),
-      Longitude=ifelse(is.na(Longitude1), Longitude2, Longitude1),
-      Latitude=ifelse(is.na(Latitude1), Latitude2, Latitude1) ) %>%
+    rename( LocationCode=Loc_Code, LocationName=Location, StatArea=StatArea,
+      Section=Section, Latitude=Location_Latitude,
+      Longitude=Location_Longitude ) %>%
+    replace_na( replace=list(Longitude=0, Latitude=0) ) %>%
     select( LocationCode, LocationName, Bed, Section, StatArea, Longitude,
       Latitude ) %>%
-    arrange( LocationCode )
+    arrange( LocationCode ) %>%
+    distinct(  )
   # Grab the spatial info (X and Y)
   locSP <- locDat %>%
-    transmute( X=ifelse(is.na(Longitude), 0, Longitude),
-      Y=ifelse(is.na(Latitude), 0, Latitude))
+    transmute( X=Longitude, Y=Latitude )
   # Put X and Y into a spatial points object
   locPts <- SpatialPoints( coords=locSP, proj4string=CRS(inCRS) )
   # Convert X and Y from WGS to Albers
