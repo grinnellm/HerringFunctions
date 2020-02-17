@@ -342,23 +342,17 @@ LoadAreaData <- function( where ) {
   # locations$Group[locations$Section %in% c(24)] <- "Selwyn"
   locations$Group[locations$Section %in% c(23, 24)] <- "023&024"
   # Manually determine groups: Prince Rupert District
-  locations$Group[locations$Section %in% c(31:33, 41:43, 51:53)] <- "No group"
-  locations$Group[locations$Section %in% c(40, 49, 50, 59)] <- "No group"
+  locations$Group[locations$Section %in% c(31:33, 40:42)] <- "Big Bay"
+  locations$Group[locations$Section %in% c(43, 50:53)] <- "Kitkatla"
   # Manually determine groups: Central Coast
-  locations$Group[locations$Section %in% c(67, 71:78)] <- "06&07"
-  locations$Group[locations$Section %in% c(70, 79)] <- "06&07"
+  locations$Group[locations$Section %in% c(67, 70:78)] <- "06&07"
   locations$Group[locations$Section %in% c(85, 86)] <- "08"
   # Manually determine groups: Strait of Georgia
-  # locations$Group <- "Others"
-  # locations$Group[locations$Section %in% c(135, 141, 151, 152, 161, 162, 163)] 
-  # <- "PowellRiver"
   locations$Group[locations$Section %in% c(132, 135, 141)] <- "Lazo"
-  locations$Group[locations$Section %in% c(142, 143, 171, 172)] <- "14&17"
-  locations$Group[locations$Section %in% c(151, 152, 161:165, 280, 291, 292)] <-
+  locations$Group[locations$Section %in% c(140, 142, 143, 170:172)] <- "14&17"
+  locations$Group[locations$Section %in% c(150:152, 160:165, 280, 291, 292)] <-
     "ESoG"
-  locations$Group[locations$Section %in% c(150, 160)] <- "ESoG"
-  locations$Group[locations$Section %in% c(173, 181, 182, 191:193)] <- "SDodd"
-  locations$Group[locations$Section %in% c(180, 190)] <- "SDodd"
+  locations$Group[locations$Section %in% c(173, 180:182, 190:193)] <- "SDodd"
   # Manually determine groups: West Coast Vancouver Island
   locations$Group[locations$Section %in% c(231)] <- "Alberni Inlet"
   locations$Group[locations$Section %in% c(232, 233)] <- "Barkley"
