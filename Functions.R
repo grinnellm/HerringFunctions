@@ -364,11 +364,14 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     FUN=unique )
   # Determine region centroids
   regCent <- gCentroid( spgeom=regAllSPDF, byid=TRUE )
+  # Cludge
+  temp <- unlist(allRegions)
+  if( region == "All") temp <- c(temp, "JS")
   # Convert to data frame
   regCentDF <- regCent %>%
     as_tibble( ) %>%
     rename( Eastings=x, Northings=y ) %>%
-    mutate( SAR=regAllSPDF$SAR, Region=unlist(allRegions) ) %>%
+    mutate( SAR=regAllSPDF$SAR, Region=temp ) %>%
     arrange( SAR )
   # Convert to data frame and select all regions: sections
   secAllDF <- secAllSPDF %>%
