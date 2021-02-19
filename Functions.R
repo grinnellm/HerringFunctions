@@ -280,7 +280,7 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     mutate( Section=formatC(secSPDF$Section, width=3, flag="0") ) %>%
     arrange( Section )
   # If 'Groups' has info, dissolve to Groups
-  if( !(all(is.na(aSm$Group))) & region!="JS" ) {  # & all(is.na(sectionSub))
+  if( !(all(is.na(aSm$Group))) & !region %in% c("JS", "All")) {  # & all(is.na(sectionSub))
     # First, remove NAs
     aSmC <- aSm %>%
       filter( !is.na(Group), !is.na(Section) ) %>%
