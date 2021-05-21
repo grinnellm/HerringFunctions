@@ -224,6 +224,10 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     arrange( SAR, StatArea, Group, Section )
   # Load the Section shapefile (has Statistical Areas and Regions)
   secRaw <- readOGR( dsn=where$locSec, layer=where$fns$sections, verbose=FALSE )
+  # Get the region number from the table
+  reg_num <- regions$SAR[which(regions$Region == region)]
+  # Is it a special region?
+  reg_type <- regions$Type[which(regions$Region == region)]
   # Function to perform some light wrangling
   UpdateSections <- function( dat, keepAll ) {
     # Subset the sections to the region(s) in question, and perform some light
@@ -237,29 +241,30 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
       select( SAR, StatArea, Section )
     # If retain all the regions
     if( keepAll ) {
-      # If the region is Johnstone Strait
-      if( all(region == "JS") ) {
-        # Update the JS SAR
+      # If the region is special
+      if( all(reg_type == "Special") ) {
+        # Update the SAR
         dat@data <- dat@data %>%
-          mutate( SAR=ifelse(Section %in% jsSections & SAR == -1, 8, SAR) )
-      }  # End if Johnstone Strait
+          mutate( SAR=ifelse(Section %in% aSm$Section & SAR == -1, 8, 
+                             SAR) )
+      }  # End if special
       # Remove the non-SAR areas
       if( region != "All" )  res <- dat[dat$SAR != -1, ]
     } else {  # End if retain all, otherwise
-      # If the region is Johnstone Strait
-      if( all(region == "JS") ) {
+      # If the region is special
+      if( all(reg_type == "Special") ) {
         # Subset to the right sections
-        res <- dat[dat$Section %in% jsSections, ]
+        res <- dat[dat$Section %in% aSm$Section, ]
         # Update the SAR
-        res$SAR <- 8
-      } else {  # End if Johnstone Strait, otherwise
+        res$SAR <- reg_num
+      } else {  # End if special, otherwise
         # Subset to the right area
         res <- dat[dat$SAR %in% aSm$SAR, ]
         # Pub sections to subset in proper format
         secSubChar <- formatC( sectionSub, width=3, format="d", flag="0" )
         # If requested, get the subset of sections specified
         if( !all(is.na(sectionSub)) )  res <- res[res$Section%in%secSubChar, ]
-      }  # End if the region is not Johnstone Strait      
+      }  # End if the region is not special     
     }  # End if not retaining all
     # Return updated sections
     return( res )
