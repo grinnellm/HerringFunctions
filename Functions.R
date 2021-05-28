@@ -42,8 +42,8 @@ SumNA <- function( x, omitNA=TRUE ) {
   # This version retuns NA if x is all NA, otherwise it returns the sum. 
   # If all NA, NA; otherwise, sum
   ifelse( all(is.na(x)), 
-    res <- NA, 
-    res <- sum(x, na.rm=omitNA) )
+          res <- NA, 
+          res <- sum(x, na.rm=omitNA) )
   # Return the result 
   return( res )
 }  # End SumNA function
@@ -54,8 +54,8 @@ MeanNA <- function( x, omitNA=TRUE ) {
   # This version retuns NA if x is all NA, otherwise it returns the mean.
   # If all NA, NA; otherwise, mean
   ifelse( all(is.na(x)), 
-    res <- NA, 
-    res <- mean(x, na.rm=omitNA) )
+          res <- NA, 
+          res <- mean(x, na.rm=omitNA) )
   # Return the result 
   return( res )
 }  # End MeanNA function
@@ -68,8 +68,8 @@ WtMeanNA <- function( x, w, omitNA=TRUE ) {
   # weighted mean.
   # If all NA, NA; otherwise, weighted mean
   ifelse( all(is.na(x)), 
-    res <- NA, 
-    res <- weighted.mean(x, w, na.rm=omitNA) )
+          res <- NA, 
+          res <- weighted.mean(x, w, na.rm=omitNA) )
   # Return the result 
   return( res )
 }  # End MeanNA function
@@ -80,8 +80,8 @@ MaxNA <- function( x, omitNA=TRUE ) {
   # This version retuns NA if x is all NA, otherwise it returns the maximum.
   # If all NA, NA; otherwise, maximum
   ifelse( all(is.na(x)), 
-    res <- NA, 
-    res <- max(x, na.rm=omitNA) )
+          res <- NA, 
+          res <- max(x, na.rm=omitNA) )
   # Return the result 
   return( res )
 }  # End MaxNA function
@@ -92,8 +92,8 @@ MinNA <- function( x, omitNA=TRUE ) {
   # This version retuns NA if x is all NA, otherwise it returns the minimum.
   # If all NA, NA; otherwise, minimum
   ifelse( all(is.na(x)), 
-    res <- NA, 
-    res <- min(x, na.rm=omitNA) )
+          res <- NA, 
+          res <- min(x, na.rm=omitNA) )
   # Return the result 
   return( res )
 }  # End MinNA function
@@ -125,8 +125,8 @@ UniqueNA <- function( x ) {
   # unique values.
   # If all NA, NA; otherwise, unique
   ifelse( all(is.na(x)), 
-    res <- NA, 
-    res <- unique(x) )
+          res <- NA, 
+          res <- unique(x) )
   # Return the result 
   return( res )
 }  # End UniqueNA function
@@ -220,14 +220,22 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     select( SAR, StatArea, Group, Section ) %>%
     distinct( ) %>%
     mutate( StatArea=formatC(StatArea, width=2, flag="0"),
-      Section=formatC(Section, width=3, flag="0") ) %>%
+            Section=formatC(Section, width=3, flag="0") ) %>%
     arrange( SAR, StatArea, Group, Section )
   # Load the Section shapefile (has Statistical Areas and Regions)
   secRaw <- readOGR( dsn=where$locSec, layer=where$fns$sections, verbose=FALSE )
-  # Get the region number from the table
-  reg_num <- regions$SAR[which(regions$Region == region)]
-  # Is it a special region?
-  reg_type <- regions$Type[which(regions$Region == region)]
+  # If region is All
+  if(region == "All") {
+    # Set the region number
+    reg_num <- 0
+    # Is it a special region?
+    reg_type <- "All"
+  } else { # End if all, otherwise
+    # Get the region number from the table
+    reg_num <- regions$SAR[which(regions$Region == region)]
+    # Is it a special region?
+    reg_type <- regions$Type[which(regions$Region == region)]
+  } # End if not all
   # Function to perform some light wrangling
   UpdateSections <- function( dat, keepAll ) {
     # Subset the sections to the region(s) in question, and perform some light
@@ -237,7 +245,7 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
     # Some light wrangling
     dat@data <- dat@data %>%
       mutate( StatArea=as.character(StatArea), 
-        Section=as.character(Section) ) %>%
+              Section=as.character(Section) ) %>%
       select( SAR, StatArea, Section )
     # If retain all the regions
     if( keepAll ) {
@@ -363,10 +371,10 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
   }  # End if not All
   # Dissolve to stat area
   saAllSPDF <- aggregate( x=secAllSPDF, by=list(Temp=secAllSPDF$StatArea),
-    FUN=unique )
+                          FUN=unique )
   # Dissolve to region
   regAllSPDF <- aggregate( x=secAllSPDF, by=list(Temp=secAllSPDF$SAR), 
-    FUN=unique )
+                           FUN=unique )
   # Determine region centroids
   regCent <- gCentroid( spgeom=regAllSPDF, byid=TRUE )
   # Get region numbers and names
@@ -413,15 +421,15 @@ LoadShapefiles <- function( where, a, bMax=5000 ) {
   cat( "done\n" )
   # Return the data frames etc
   return( list(secDF=secDF, secCentDF=secCentDF, 
-    grpDF=grpDF, grpCentDF=grpCentDF, 
-    saDF=saDF, saCentDF=saCentDF, 
-    regSPDF=regSPDF, regDF=regDF, regCentDF=regCentDF,  
-    xyRatio=xyRatio, extDF=extDF,
-    landCropSPDF=landCropSPDF, landCropDF=landCropDF, 
-    secAllSPDF=secAllSPDF,
-    secAllDF=secAllDF, saAllDF=saAllDF, regAllDF=regAllDF, 
-    extAllDF=extAllDF, xyAllRation=xyAllRatio, 
-    landAllCropDF=landAllCropDF) )
+               grpDF=grpDF, grpCentDF=grpCentDF, 
+               saDF=saDF, saCentDF=saCentDF, 
+               regSPDF=regSPDF, regDF=regDF, regCentDF=regCentDF,  
+               xyRatio=xyRatio, extDF=extDF,
+               landCropSPDF=landCropSPDF, landCropDF=landCropDF, 
+               secAllSPDF=secAllSPDF,
+               secAllDF=secAllDF, saAllDF=saAllDF, regAllDF=regAllDF, 
+               extAllDF=extAllDF, xyAllRation=xyAllRatio, 
+               landAllCropDF=landAllCropDF) )
 }  # End LoadShapefiles function
 
 # Function to make a circle
@@ -484,7 +492,7 @@ ClipExtent <- function( dat, spObj, bufDist=NA, silent=FALSE ) {
   if( nrow(samp) > 0 ) {
     # Make a spatial points object
     spSamp <- SpatialPoints( coords=select(samp, Eastings, Northings),
-      proj4string=CRS(outCRS) )
+                             proj4string=CRS(outCRS) )
     # Determine which points are outside the SAR
     inside <- over( x=spSamp, y=spObj )$SAR
     # If any points are outside the SAR
@@ -492,10 +500,10 @@ ClipExtent <- function( dat, spObj, bufDist=NA, silent=FALSE ) {
       # Set the X and Y to NA
       samp <- samp %>%
         mutate( Eastings=ifelse(is.na(inside), NA, Eastings),
-          Northings=ifelse(is.na(inside), NA, Northings) )
+                Northings=ifelse(is.na(inside), NA, Northings) )
       # Message
       if( !silent) cat( "Point(s) outside SAR boundary: set X and Y to NA:", 
-        length(inside[is.na(inside)]), "\n" )
+                        length(inside[is.na(inside)]), "\n" )
     }  # End if any points are outside the SAR
   } else {  # End if there are rows, otherwise
     # Message
@@ -526,8 +534,8 @@ GetDecade <- function( dat, r=10 ) {
 WriteLongTable <- function( dat, fn ) {
   # Write the xtable (first time)
   print( x=dat, file=fn, tabular.environment='longtable', floating=FALSE, 
-    include.rownames=FALSE, booktabs=TRUE, only.contents=TRUE, 
-    NA.string=NA, include.colnames=FALSE, hline.after=FALSE )
+         include.rownames=FALSE, booktabs=TRUE, only.contents=TRUE, 
+         NA.string=NA, include.colnames=FALSE, hline.after=FALSE )
   # Load the xtable
   xTabLong <- readLines( con=fn, warn=FALSE )
   # Find the midrule
@@ -541,7 +549,7 @@ WriteLongTable <- function( dat, fn ) {
   if( grepl(pattern="\\ ", x=xTabLong[length(xTabLong)]) )
     xTabLong[length(xTabLong)] <- 
     gsub( pattern=" \\\\ ", replacement="", x=xTabLong[length(xTabLong)],
-      fixed=TRUE )
+          fixed=TRUE )
   # Re-write the xtable
   writeLines( text=xTabLong, con=fn )
   # Add a bottomrule at the end
@@ -578,7 +586,7 @@ myTheme <- theme(
 Num2Word <- function( x ) {
   # Get the list of numbers and words
   vec <- c( one=1, two=2, three=3, four=4, five=5, six=6, seven=7, eight=8, 
-    nine=9 )
+            nine=9 )
   # Get the index corresponding to the number
   ind <- which( vec == x )
   # Get the name
@@ -601,7 +609,7 @@ UsePackages <- function( pkgs, locn="https://cran.rstudio.com/" ) {
   for( i in 1:length(rPkgs) ) {
     # Load required packages using 'library'
     eval( parse(text=paste("suppressPackageStartupMessages(library(", rPkgs[i], 
-      "))", sep="")) )
+                           "))", sep="")) )
   }  # End i loop over package names
 }  # End UsePackages function
 
@@ -626,7 +634,7 @@ CheckSpatialOverlay <- function( pts, shape, type ) {
   if( any(is.na(pts$Eastings), is.na(pts$Northings)) ) {
     # Message re NAs
     warning( "NAs in spatial info: Eastings (", sum(is.na(pts$Eastings)),
-      "), and Northings (", sum(is.na(pts$Northings)), ")", sep="" )
+             "), and Northings (", sum(is.na(pts$Northings)), ")", sep="" )
     # Remove the NAs
     pts <- pts %>%
       filter( !is.na(Eastings), !is.na(Northings) )
@@ -636,7 +644,7 @@ CheckSpatialOverlay <- function( pts, shape, type ) {
     rename( StatAreaLoc=StatArea, SectionLoc=Section ) %>%
     mutate( Source=type ) %>%
     select( Source, StatAreaLoc, SectionLoc, LocationCode, LocationName,
-      Eastings, Northings, Longitude, Latitude ) %>%
+            Eastings, Northings, Longitude, Latitude ) %>%
     distinct( )
   # Convert to spatial object
   ptsSPDF <- SpatialPointsDataFrame( 
