@@ -23,7 +23,7 @@ require(ggplot2)
 Season2Year <- function(dat) {
   # The herring 'season' column is a combination of the two fishery years: for
   # example, season '20123' indicates the years 2012 and 2013. The input *.dat
-  # file for the analysis using ADMB requires this to be an acual year, which we
+  # file for the analysis using ADMB requires this to be an actual year, which we
   # define as the second (i.e., later) year, 2013. This function takes in a
   # vector of seasons (dat), and outputs a vector of years (res).
   # Grab the first 4 characters
