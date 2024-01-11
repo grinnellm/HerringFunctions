@@ -488,17 +488,18 @@ ClipExtent <- function(dat, spObj, bufDist = NA, silent = FALSE) {
   # and Y for these points is wrong) so that we don't show them in charts. We
   # retain the points themselves, because the associated data is still useful.
   # Return the points as a data frame, with updated X and Y info.
-  # Require sp library
-  require(sp)
+  # Require sf library
+  require(sf)
+  # Convert to sf
+  spObj <- st_as_sf(spObj)
   # Creat a buffer around the spatial object, if requested
   if (!is.na(bufDist)) {
-    # Require rgeos library
-    require(rgeos)
     # Make a buffer
-    spObj <- gBuffer(spgeom = spObj, byid = TRUE, width = bufDist)
+    spObj <- st_buffer(x = spObj, dist = bufDist)
   } # End if making a buffer
   # Get NAs (if any)
-  isNA <- filter(.data = dat, is.na(Eastings), is.na(Northings))
+  isNA <- dat %>%
+    filter(is.na(Eastings), is.na(Northings))
   # Message if there are any
   if (nrow(isNA) > 0 & !silent) {
     cat("Point(s) with missing spatial coordinates (NA):", nrow(isNA), "\n")
@@ -509,12 +510,12 @@ ClipExtent <- function(dat, spObj, bufDist = NA, silent = FALSE) {
   # If there are rows
   if (nrow(samp) > 0) {
     # Make a spatial points object
-    spSamp <- SpatialPoints(
-      coords = select(samp, Eastings, Northings),
-      proj4string = CRS(outCRS)
+    spSamp <- st_as_sf(samp,
+                       coords = c("Eastings", "Northings"),
+                       crs = CRS(outCRS)
     )
     # Determine which points are outside the SAR
-    inside <- over(x = spSamp, y = spObj)$SAR
+    inside <- st_within(x = spSamp, y = spObj)$SAR
     # If any points are outside the SAR
     if (any(is.na(inside))) {
       # Set the X and Y to NA
