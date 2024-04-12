@@ -16,6 +16,7 @@
 ##### Packages #####
 # TODO: There are others!
 require(ggplot2)
+require(sf)
 
 ##### Main #####
 
